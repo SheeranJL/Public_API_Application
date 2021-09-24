@@ -1,13 +1,19 @@
+html {
+  background-color: rgba(209, 231, 241, 1);
+}
+
 body {
   position: relative;
 }
 
-.grid-container {
-  display: flex;
-  flex-wrap: wrap;
-  flex-basis: auto;
-  justify-content:  space-around;
+h1 {
+  text-align: center;
+}
 
+
+.grid-container {
+  display: flex
+  grid-template-columns: repeat(3, 1fr);
 }
 
 .overlay {
@@ -19,19 +25,23 @@ body {
   background: rgba(100, 100, 100, 0.4)
 }
 
-.avatar {
+/* .avatar {
   border-radius: 50%;
-}
+} */
 
 .modal {
   position: relative;
-  background-color: cyan;
-  border: 5px solid yellow;
+  background-color: rgba(125, 128, 130);
+  border: 5px solid black;
   border-radius: 5px;
   width: 375px;
   margin: 15% auto auto;
   text-align: center;
   padding: 30px 20px;
+}
+
+.modalImage {
+  width: 300px;
 }
 
 .modal-close {
@@ -45,12 +55,30 @@ body {
   display: none;
 }
 
+.test-container {
+  padding-left: 10px;
+
+}
+
+.name, .email, .address {
+  padding: 0;
+}
+
 .card {
-  border: 2px solid black;
   display: flex;
+  flex-basis: 1;
+  border: 2px solid black;
   margin-bottom: 5%;
+  background-color: rgba(129, 192, 194, 0.3);
 }
 
-.avatar {
+@media only screen and (min-width: 1150px) {
 
-}
+  .grid-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap:2em;
+  }
+
+
+};
