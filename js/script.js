@@ -1,88 +1,79 @@
-let employees = [];
-let urlAPI = `https://randomuser.me/api/?results=12&inc=name, picture,
+const personUrl = `https://randomuser.me/api/?results=12&inc=name, picture,
 email, location, phone, dob &noinfo &nat=US`
-let gridContainer = document.querySelector('.grid-container');
+const gridContainer = document.querySelector('.grid-container');
+let people = [];
 let overlay = document.querySelector('.overlay');
-let modalContainer = document.querySelector('.modal-content');
-let modelClose = document.querySelector('.modal-close');
+let modal = document.querySelector('.modal-content');
+let closeButton = document.querySelector('.modal-close')
+
+//The following code will fetch the API data which contains all the employee information we need for our project
+fetch(personUrl)
+  .then(response => response.json()) //converting the returned JSON object from fetch into a format we can use and manipulate
+  .then(response => response.results)
+  .then(displayPeople) //calling the displayPeople function passing it through the response data from the fetch call
+  .catch(err => (console.log('Error fetching data', err)))
 
 
-fetch(urlAPI)
-  .then(response => response.json()) //Here we're returning the JSON object into a formal we can use
-  .then(response => response.results) //Logging the data to ensure the fetch worked and to see what format the data is in.
-  .then(displayEmployees) //Here we're calling a function that will create the employee cards
-  .catch(error => console.log('Error fetching data', error)); //This line will catch any errors and log them to the console.
-
-
-function displayEmployees(employeeData) {
-  employees = employeeData;
-  console.log(employees)
-  let employeeHTML = ''
-
-  employees.forEach((employee, index) => {
-    let name = employee.name;
-    let email = employee.email;
-    let city = employee.location.city;
-    let picture = employee.picture.large;
-
-    employeeHTML += `
+//Using template literals, the following function will display the grid of twelve employees using the data fetched from the API.
+function displayPeople(data) {
+  people = data //passing the data into the new 'people' array so it can be used outside the function
+  let displayHTML = ''
+  people.forEach((person, index) => {
+    let {name:{first, last}, email, phone, dob:{date}, location:{city, postcode, state}, picture} = people[index]; //deconstructing the object to use key names as variables.
+    let html =
+    `
     <div class="card" data-index=${index}>
-      <img src=${picture} class="avatar">
+      <img src=${picture.large} class="avatar">
       <div class="test-container">
-        <h2 class="name">${name.first} ${name.last}</h2>
+        <h2 class="name">${first} ${last}</h2>
         <p class="email">${email}</p>
-        <p class="address">${city}</p>
+        <p class="address">${city}, ${state}</p>
       </div>
     </div>
     `
-  });
-  gridContainer.innerHTML = employeeHTML;
-};
-
-
-function displayModal(index) {
-  let { name, dob, phone, email, location: {city, street, state, postcode}, picture} = employees[index];
-  let date = new Date(dob.date);
-
-  let modalHTML =
-  `
-    <img src="${picture.large}" class="avatar">
-    <div class="test-container">
-      <h2 class="name">${name.first} ${name.last}</h2>
-      <p class="email">${email}</p>
-      <p class="address">${city}</p>
-      <hr />
-      <p>${phone}</p>
-      <p class="address">${street} ${state} ${postcode}</p>
-      <p>Bithday: ${date.getMonth()}/${date.getDate()}/${date.getFullYear()}</p>
-    </div>
-  `;
-
-  overlay.classList.remove("hidden");
-  modalContainer.innerHTML = modalHTML;
+    displayHTML += html;
+  })
+  gridContainer.innerHTML = displayHTML;
 }
 
 
+//The following function will display the HTML of the modal when a user clicks on an employee profile.
+function displayOverlay(index) {
+  let {name:{first, last}, email, phone, dob, location:{city, street, postcode, state}, picture} = people[index]; //deconstrucing the object so we can use key value names as variables to display info
+  let date = new Date(dob.date)
+  let modalHTML =
+  `
+  <div class="modal-content">
+    <img src=${picture.large} class="avatar modalimage">
+    <div class="test-container">
+      <h2 class="name">${first} ${last}</h2>
+      <p class="email">${email}</p>
+      <p class="address">${city}, ${state}</p>
+      <hr />
+      <p>${phone}</p>
+      <p class="address">${street.number} ${street.name}, ${city}, ${state}, ${postcode}</p>
+      <p>Bithday: ${date.getMonth()}/${date.getDate()}/${date.getFullYear()}</p>
+  </div>
+  `
+  modal.innerHTML = modalHTML;
+  overlay.classList.remove('hidden'); //removing the 'hidden' class from the modal so it appears.
+};
+
+
+//The following code will listen for clicks on an employees profile and will call the displayOverlay function to construct the HTML used to display the modal
 gridContainer.addEventListener('click', (e) => {
   target = e.target;
-  console.log(target);
-
-  if (target !== gridContainer) {
-    const card = target.closest(".card")
-    const index = card.getAttribute('data-index');
-
-    displayModal(index);
-  }
+  if (target !== gridContainer) { //this statement will ensure that only clicks on user profiles trigger a response.
+    let card = target.closest('.card');
+    let index = card.getAttribute('data-index');
+    displayOverlay(index)
+  };
 });
 
 
-modelClose.addEventListener('click', (e) => {
-  target = e.target;
-  console.log(target.type);
-
-  if (target.type === 'submit') {
-    overlay.classList.add('hidden');
-  }
-
-
+//This code will listen for clicks on the 'x' button within the modal and will hide the modal by applying the 'hidden' class
+closeButton.addEventListener('click', (e) => {
+  target = e.target
+  console.log(target)
+  overlay.classList.add('hidden');
 })
